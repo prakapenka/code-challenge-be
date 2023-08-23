@@ -1,0 +1,8 @@
+spring:
+  jackson:
+    mapper:
+      allow-coercion-of-scalars: false
+  datasource:
+    url: jdbc:postgresql://localhost:32768/mydatabase
+    username: myuser
+    password: 6e886ad4-40d0-11ee-8ebd-dbdd0e904c18

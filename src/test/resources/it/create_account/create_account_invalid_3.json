@@ -1,0 +1,7 @@
+{
+  "accountId" : "invalid_usd",
+  "balance" : {
+    "amount" : 0.01,
+    "currencyUnit" : "USD"
+  }
+}
