@@ -9,13 +9,14 @@ import localhost.challenge.domain.Account;
 import localhost.challenge.domain.exception.AccountCreationException;
 import localhost.challenge.service.port.CreateAccount;
 import localhost.challenge.service.port.GetAccount;
+import localhost.challenge.service.port.IsAccountExists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class AccountAdapter implements GetAccount, CreateAccount {
+public class AccountAdapter implements GetAccount, CreateAccount, IsAccountExists {
 
   private final AccountRepository repository;
 
@@ -40,5 +41,9 @@ public class AccountAdapter implements GetAccount, CreateAccount {
       throw new AccountCreationException(
           "unable to create account id: " + account.accountId(), cve);
     }
+  }
+
+  public boolean accountExists(String accountId) {
+    return repository.existsByAccountId(accountId);
   }
 }

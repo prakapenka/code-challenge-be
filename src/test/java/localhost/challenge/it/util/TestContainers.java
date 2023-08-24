@@ -1,4 +1,4 @@
-package localhost.challenge.it;
+package localhost.challenge.it.util;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
