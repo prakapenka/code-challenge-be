@@ -159,10 +159,15 @@
         <groupId>com.spotify.fmt</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
         <version>${fmt-maven-plugin.version}</version>
+        <configuration>
+          <displayFiles>true</displayFiles>
+          <failOnError>true</failOnError>
+        </configuration>
         <executions>
           <execution>
+            <phase>validate</phase>
             <goals>
-              <goal>format</goal>
+              <goal>check</goal>
             </goals>
           </execution>
         </executions>
