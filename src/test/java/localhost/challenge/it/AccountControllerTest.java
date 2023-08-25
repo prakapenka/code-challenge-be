@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.stream.Stream;
 import localhost.challenge.it.util.TestContainers;
 import org.junit.jupiter.api.Test;
@@ -91,38 +92,28 @@ class AccountControllerTest extends TestContainers {
         .andExpect(jsonPath("$.balance.currencyUnit").value(expectedCurrency));
   }
 
-  private static Stream<Arguments> provideValidAccountCreationRequests() throws IOException {
-    return Stream.of(
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_valid_1.json"),
-            "test_id_1.com",
-            "0.0",
-            "EUR"),
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_valid_2.json"),
-            "test_id_2",
-            "0.01",
-            "EUR"),
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_valid_3.json"),
-            "a",
-            "1.0",
-            "EUR"),
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_valid_4.json"),
-            "ab",
-            "1.0",
-            "EUR"),
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_valid_5.json"),
-            "fraction_99",
-            "0.99",
-            "EUR"),
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_valid_6.json"),
-            "fraction_10",
-            "0.1",
-            "EUR"));
+  private static Stream<Arguments> provideValidAccountCreationRequests() {
+    String[][] files = {
+      {"create_account_valid_1.json", "test_id_1.com", "0.0", "EUR"},
+      {"create_account_valid_2.json", "test_id_2", "0.01", "EUR"},
+      {"create_account_valid_3.json", "a", "1.0", "EUR"},
+      {"create_account_valid_4.json", "ab", "1.0", "EUR"},
+      {"create_account_valid_5.json", "fraction_99", "0.99", "EUR"},
+      {"create_account_valid_6.json", "fraction_10", "0.1", "EUR"}
+    };
+    final String path = "classpath:it/create_account/";
+
+    return Arrays.stream(files)
+        .peek(f -> f[0] = path + f[0])
+        .peek(
+            f -> {
+              try {
+                f[0] = loadJsonFileAsString(f[0]);
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            })
+        .map(f -> Arguments.of(f[0], f[1], f[2], f[3]));
   }
 
   @ParameterizedTest
@@ -133,24 +124,26 @@ class AccountControllerTest extends TestContainers {
         .andExpect(status().isBadRequest());
   }
 
-  private static Stream<Arguments> provideInvalidAccountCreationRequests() throws IOException {
-    return Stream.of(
-        // invalid account id
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_invalid_0.json")),
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_invalid_1.json")),
-        // amount less than 0
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_invalid_2.json")),
-        // currency is not allowed
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_invalid_3.json")),
-        // extra factions are not allowed
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_invalid_4.json")),
-        // unknown currency
-        Arguments.of(
-            loadJsonFileAsString("classpath:it/create_account/create_account_invalid_5.json")));
+  private static Stream<Arguments> provideInvalidAccountCreationRequests() {
+    String[] files = {
+      "create_account_invalid_0.json",
+      "create_account_invalid_1.json",
+      "create_account_invalid_2.json",
+      "create_account_invalid_3.json",
+      "create_account_invalid_4.json",
+      "create_account_invalid_5.json"
+    };
+    final String path = "classpath:it/create_account/";
+    return Arrays.stream(files)
+        .map(f -> path + f)
+        .map(
+            f -> {
+              try {
+                return loadJsonFileAsString(f);
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            })
+        .map(Arguments::of);
   }
 }
