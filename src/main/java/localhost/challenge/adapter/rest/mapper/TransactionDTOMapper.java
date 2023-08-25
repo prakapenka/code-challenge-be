@@ -6,9 +6,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper
-public interface TransactionDTOMapper extends BalanceToMonetaryMapper {
+public interface TransactionDTOMapper {
 
   @Mapping(source = "txId", target = "transactionId")
-  @Mapping(target = "amount", source = "amount", qualifiedBy = BalanceToMonetary.class)
   Transaction mapToDomain(CreateTransactionDTO dto);
 }

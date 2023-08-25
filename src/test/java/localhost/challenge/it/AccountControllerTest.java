@@ -96,7 +96,7 @@ class AccountControllerTest extends TestContainers {
         Arguments.of(
             loadJsonFileAsString("classpath:it/create_account/create_account_valid_1.json"),
             "test_id_1.com",
-            "0",
+            "0.0",
             "EUR"),
         Arguments.of(
             loadJsonFileAsString("classpath:it/create_account/create_account_valid_2.json"),
@@ -106,12 +106,12 @@ class AccountControllerTest extends TestContainers {
         Arguments.of(
             loadJsonFileAsString("classpath:it/create_account/create_account_valid_3.json"),
             "a",
-            "1",
+            "1.0",
             "EUR"),
         Arguments.of(
             loadJsonFileAsString("classpath:it/create_account/create_account_valid_4.json"),
             "ab",
-            "1",
+            "1.0",
             "EUR"),
         Arguments.of(
             loadJsonFileAsString("classpath:it/create_account/create_account_valid_5.json"),

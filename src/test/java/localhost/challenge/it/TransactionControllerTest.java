@@ -52,7 +52,7 @@ public class TransactionControllerTest extends TestContainers {
     this.mockMvc
         .perform(get("/a1"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.balance.amount").value("1"));
+        .andExpect(jsonPath("$.balance.amount").value("1.0"));
     this.mockMvc
         .perform(get("/a2"))
         .andExpect(status().isOk())

@@ -1,3 +1,5 @@
 package localhost.challenge.adapter.rest.dto;
 
-public record AccountDTO(String accountId, AccountBalanceDTO balance) {}
+import javax.money.MonetaryAmount;
+
+public record AccountDTO(String accountId, MonetaryAmount balance) {}

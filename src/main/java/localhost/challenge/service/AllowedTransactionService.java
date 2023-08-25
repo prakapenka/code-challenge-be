@@ -13,6 +13,10 @@ public class AllowedTransactionService implements IsAllowedTransaction {
 
   @Override
   public boolean isAllowedTransaction(MonetaryAmount amount) {
+    if (isRejectedFraction(amount)) {
+      return false;
+    }
+
     final var actualBalance = amount.getNumber().numberValue(BigDecimal.class);
     // do not allow negative balance
     if (actualBalance.compareTo(MAX_ACCEPTED) > 0) {
@@ -21,5 +25,16 @@ public class AllowedTransactionService implements IsAllowedTransaction {
     } else {
       return actualBalance.compareTo(BigDecimal.ZERO) >= 0;
     }
+  }
+
+  private boolean isRejectedFraction(MonetaryAmount amount) {
+    int fractionDigits = amount.getCurrency().getDefaultFractionDigits();
+    var multiplayer = BigDecimal.valueOf(Math.pow(10, fractionDigits));
+
+    var exactValue = amount.getNumber().numberValue(BigDecimal.class);
+
+    var fraction = exactValue.multiply(multiplayer).remainder(BigDecimal.ONE);
+    // do not allow fractions greater then .99, i.e. 0.101 EUR is forbidden
+    return fraction.compareTo(BigDecimal.ZERO) > 0;
   }
 }
