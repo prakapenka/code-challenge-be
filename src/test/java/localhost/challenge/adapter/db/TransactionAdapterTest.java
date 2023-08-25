@@ -57,14 +57,15 @@ class TransactionAdapterTest {
     assertBigDecimalEquals(BigDecimal.valueOf(20.02), to.getBalance());
     assertBigDecimalEquals(BigDecimal.valueOf(10), from.getBalance());
 
-    verify(transactionRepository).save(assertArg(
-        t -> assertAll(
-            () -> assertEquals("someTxId", t.getTransactionId()),
-            () -> assertEquals(from, t.getFrom()),
-            () -> assertEquals(to, t.getTo()),
-            () -> assertBigDecimalEquals(BigDecimal.valueOf(10.01), t.getAmount())
-        )
-    ));
+    verify(transactionRepository)
+        .save(
+            assertArg(
+                t ->
+                    assertAll(
+                        () -> assertEquals("someTxId", t.getTransactionId()),
+                        () -> assertEquals(from, t.getFrom()),
+                        () -> assertEquals(to, t.getTo()),
+                        () -> assertBigDecimalEquals(BigDecimal.valueOf(10.01), t.getAmount()))));
   }
 
   @Test
@@ -92,7 +93,8 @@ class TransactionAdapterTest {
     when(accountRepository.findByAccountId(eq("from"))).thenReturn(Optional.of(from));
     when(accountRepository.findByAccountId(eq("to"))).thenReturn(Optional.of(to));
 
-    assertThrows(TransactionBalanceException.class,
+    assertThrows(
+        TransactionBalanceException.class,
         () -> transactionAdapter.performTransaction(transaction));
 
     verify(isBalanceLimit, never()).isRejected(any());
@@ -104,7 +106,8 @@ class TransactionAdapterTest {
     var transaction = getTestTransaction(10.01);
     when(accountRepository.findByAccountId(eq("from"))).thenReturn(Optional.empty());
 
-    assertThrows(TransactionBalanceException.class,
+    assertThrows(
+        TransactionBalanceException.class,
         () -> transactionAdapter.performTransaction(transaction));
 
     verify(isBalanceLimit, never()).isRejected(any());
@@ -120,7 +123,8 @@ class TransactionAdapterTest {
     when(accountRepository.findByAccountId(eq("from"))).thenReturn(Optional.of(from));
     when(accountRepository.findByAccountId(eq("to"))).thenReturn(Optional.empty());
 
-    assertThrows(TransactionBalanceException.class,
+    assertThrows(
+        TransactionBalanceException.class,
         () -> transactionAdapter.performTransaction(transaction));
 
     verify(isBalanceLimit, never()).isRejected(any());
@@ -134,7 +138,8 @@ class TransactionAdapterTest {
     when(accountRepository.findByAccountId(eq("from"))).thenReturn(Optional.of(from));
     when(accountRepository.findByAccountId(eq("to"))).thenReturn(Optional.of(to));
 
-    assertThrows(TransactionBalanceException.class,
+    assertThrows(
+        TransactionBalanceException.class,
         () -> transactionAdapter.performTransaction(transaction));
 
     verify(isBalanceLimit, never()).isRejected(any());
@@ -152,7 +157,8 @@ class TransactionAdapterTest {
     // explicitly reject transaction
     when(isBalanceLimit.isRejected(any(BigDecimal.class))).thenReturn(true);
 
-    assertThrows(TransactionBalanceException.class,
+    assertThrows(
+        TransactionBalanceException.class,
         () -> transactionAdapter.performTransaction(transaction));
 
     verify(isBalanceLimit).isRejected(eq(BigDecimal.valueOf(10.01)));
