@@ -2,6 +2,7 @@ package localhost.challenge.adapter.db;
 
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.util.Objects;
 import localhost.challenge.adapter.db.entity.AccountEntity;
 import localhost.challenge.adapter.db.entity.AccountRepository;
@@ -10,6 +11,7 @@ import localhost.challenge.adapter.db.entity.TransactionRepository;
 import localhost.challenge.domain.Transaction;
 import localhost.challenge.domain.exception.TransactionBalanceException;
 import localhost.challenge.service.port.CreateTransaction;
+import localhost.challenge.service.port.IsBalanceLimit;
 import lombok.RequiredArgsConstructor;
 import org.javamoney.moneta.Money;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,6 +24,8 @@ public class TransactionAdapter implements CreateTransaction {
   private final AccountRepository accountRepository;
 
   private final TransactionRepository transactionRepository;
+
+  private final IsBalanceLimit isBalanceLimit;
 
   @Override
   @Transactional
@@ -41,8 +45,17 @@ public class TransactionAdapter implements CreateTransaction {
     }
 
     final var fromNewBalance = moneyFrom.subtract(amount).getNumber().numberValue(BigDecimal.class);
-    accountPair.from.setBalance(fromNewBalance);
     final var toNewBalance = moneyTo.add(amount).getNumber().numberValue(BigDecimal.class);
+
+    // check resulted amount is too big to allow transfers
+    if (isBalanceLimit.isRejected(toNewBalance)) {
+      var message =
+          MessageFormat.format(
+              "Unable to process. Account {0}, amount rejected: {1}", accountPair.to, toNewBalance);
+      throw new TransactionBalanceException(message);
+    }
+
+    accountPair.from.setBalance(fromNewBalance);
     accountPair.to.setBalance(toNewBalance);
 
     TransactionEntity transactionEntity = new TransactionEntity();
