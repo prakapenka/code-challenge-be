@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.Optional;
 import javax.money.Monetary;
+import javax.money.MonetaryAmount;
 import localhost.challenge.adapter.db.entity.AccountEntity;
 import localhost.challenge.adapter.db.entity.AccountRepository;
 import localhost.challenge.adapter.db.entity.TransactionRepository;
@@ -50,12 +51,14 @@ class TransactionAdapterTest {
 
     when(accountRepository.findByAccountId(eq("from"))).thenReturn(Optional.of(from));
     when(accountRepository.findByAccountId(eq("to"))).thenReturn(Optional.of(to));
-    when(isBalanceLimit.isRejected(any(BigDecimal.class))).thenReturn(false);
+    when(isBalanceLimit.isRejected(any(MonetaryAmount.class))).thenReturn(false);
 
     transactionAdapter.performTransaction(transaction);
 
-    assertBigDecimalEquals(BigDecimal.valueOf(20.02), to.getBalance());
-    assertBigDecimalEquals(BigDecimal.valueOf(10), from.getBalance());
+    assertBigDecimalEquals(
+        BigDecimal.valueOf(20.02), to.getAmount().getNumber().numberValue(BigDecimal.class));
+    assertBigDecimalEquals(
+        BigDecimal.valueOf(10), from.getAmount().getNumber().numberValue(BigDecimal.class));
 
     verify(transactionRepository)
         .save(
@@ -65,7 +68,10 @@ class TransactionAdapterTest {
                         () -> assertEquals("someTxId", t.getTransactionId()),
                         () -> assertEquals(from, t.getFrom()),
                         () -> assertEquals(to, t.getTo()),
-                        () -> assertBigDecimalEquals(BigDecimal.valueOf(10.01), t.getAmount()))));
+                        () ->
+                            assertBigDecimalEquals(
+                                BigDecimal.valueOf(10.01),
+                                t.getAmount().getNumber().numberValue(BigDecimal.class)))));
   }
 
   @Test
@@ -76,12 +82,14 @@ class TransactionAdapterTest {
     final var to = getAccount(0, "to");
     when(accountRepository.findByAccountId(eq("from"))).thenReturn(Optional.of(from));
     when(accountRepository.findByAccountId(eq("to"))).thenReturn(Optional.of(to));
-    when(isBalanceLimit.isRejected(any(BigDecimal.class))).thenReturn(false);
+    when(isBalanceLimit.isRejected(any(MonetaryAmount.class))).thenReturn(false);
 
     transactionAdapter.performTransaction(transaction);
 
-    assertBigDecimalEquals(BigDecimal.valueOf(0), from.getBalance());
-    assertBigDecimalEquals(BigDecimal.valueOf(10.01), to.getBalance());
+    assertBigDecimalEquals(
+        BigDecimal.valueOf(0), from.getAmount().getNumber().numberValue(BigDecimal.class));
+    assertBigDecimalEquals(
+        BigDecimal.valueOf(10.01), to.getAmount().getNumber().numberValue(BigDecimal.class));
   }
 
   @Test
@@ -97,7 +105,7 @@ class TransactionAdapterTest {
         TransactionBalanceException.class,
         () -> transactionAdapter.performTransaction(transaction));
 
-    verify(isBalanceLimit, never()).isRejected(any());
+    verify(isBalanceLimit, never()).isRejected(any(MonetaryAmount.class));
   }
 
   @Test
@@ -110,7 +118,7 @@ class TransactionAdapterTest {
         TransactionBalanceException.class,
         () -> transactionAdapter.performTransaction(transaction));
 
-    verify(isBalanceLimit, never()).isRejected(any());
+    verify(isBalanceLimit, never()).isRejected(any(MonetaryAmount.class));
     // if from account not found we do not search for to account
     verify(accountRepository, never()).findByAccountId(eq("to"));
   }
@@ -127,7 +135,7 @@ class TransactionAdapterTest {
         TransactionBalanceException.class,
         () -> transactionAdapter.performTransaction(transaction));
 
-    verify(isBalanceLimit, never()).isRejected(any());
+    verify(isBalanceLimit, never()).isRejected(any(MonetaryAmount.class));
   }
 
   @Test
@@ -142,7 +150,7 @@ class TransactionAdapterTest {
         TransactionBalanceException.class,
         () -> transactionAdapter.performTransaction(transaction));
 
-    verify(isBalanceLimit, never()).isRejected(any());
+    verify(isBalanceLimit, never()).isRejected(any(MonetaryAmount.class));
   }
 
   @Test
@@ -155,13 +163,14 @@ class TransactionAdapterTest {
     when(accountRepository.findByAccountId(eq("to"))).thenReturn(Optional.of(to));
 
     // explicitly reject transaction
-    when(isBalanceLimit.isRejected(any(BigDecimal.class))).thenReturn(true);
+    when(isBalanceLimit.isRejected(any(MonetaryAmount.class))).thenReturn(true);
 
     assertThrows(
         TransactionBalanceException.class,
         () -> transactionAdapter.performTransaction(transaction));
 
-    verify(isBalanceLimit).isRejected(eq(BigDecimal.valueOf(10.01)));
+    final var expectedMoney = Money.of(BigDecimal.valueOf(10.01), Monetary.getCurrency("EUR"));
+    verify(isBalanceLimit).isRejected(eq(expectedMoney));
     verify(transactionRepository, never()).save(any());
   }
 
@@ -181,8 +190,7 @@ class TransactionAdapterTest {
 
   private AccountEntity getAccountWithCurrency(double amount, String currency, String id) {
     AccountEntity ac = new AccountEntity();
-    ac.setBalance(BigDecimal.valueOf(amount));
-    ac.setCurrency(currency);
+    ac.setAmount(Money.of(BigDecimal.valueOf(amount), currency));
     ac.setAccountId(id);
     return ac;
   }

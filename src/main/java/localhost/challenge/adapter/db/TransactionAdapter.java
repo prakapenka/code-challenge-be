@@ -1,7 +1,6 @@
 package localhost.challenge.adapter.db;
 
 import jakarta.transaction.Transactional;
-import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.Objects;
 import localhost.challenge.adapter.db.entity.AccountEntity;
@@ -13,7 +12,6 @@ import localhost.challenge.domain.exception.TransactionBalanceException;
 import localhost.challenge.service.port.CreateTransaction;
 import localhost.challenge.service.port.IsBalanceLimit;
 import lombok.RequiredArgsConstructor;
-import org.javamoney.moneta.Money;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
@@ -32,20 +30,20 @@ public class TransactionAdapter implements CreateTransaction {
   public void performTransaction(Transaction transaction) {
 
     final var accountPair = getAccountPair(transaction.from(), transaction.to());
-    final var moneyFrom = Money.of(accountPair.from.getBalance(), accountPair.from.getCurrency());
-    final var moneyTo = Money.of(accountPair.to.getBalance(), accountPair.to.getCurrency());
+    final var moneyFrom = accountPair.from.getAmount();
+    final var moneyTo = accountPair.to.getAmount();
 
     if (!Objects.equals(moneyFrom.getCurrency(), moneyTo.getCurrency())) {
       throw new TransactionBalanceException("cross currency transactions not supported");
     }
 
-    final var amount = transaction.amount();
+    final var transactionAmount = transaction.amount();
     if (moneyFrom.isLessThan(transaction.amount())) {
       throw new TransactionBalanceException("from account: not enough balance");
     }
 
-    final var fromNewBalance = moneyFrom.subtract(amount).getNumber().numberValue(BigDecimal.class);
-    final var toNewBalance = moneyTo.add(amount).getNumber().numberValue(BigDecimal.class);
+    final var fromNewBalance = moneyFrom.subtract(transactionAmount);
+    final var toNewBalance = moneyTo.add(transactionAmount);
 
     // check resulted amount is too big to allow transfers
     if (isBalanceLimit.isRejected(toNewBalance)) {
@@ -55,15 +53,14 @@ public class TransactionAdapter implements CreateTransaction {
       throw new TransactionBalanceException(message);
     }
 
-    accountPair.from.setBalance(fromNewBalance);
-    accountPair.to.setBalance(toNewBalance);
+    accountPair.from.setAmount(fromNewBalance);
+    accountPair.to.setAmount(toNewBalance);
 
     TransactionEntity transactionEntity = new TransactionEntity();
     transactionEntity.setTransactionId(transaction.transactionId());
     transactionEntity.setFrom(accountPair.from);
     transactionEntity.setTo(accountPair.to);
-    transactionEntity.setAmount(amount.getNumber().numberValue(BigDecimal.class));
-    transactionEntity.setCurrency(amount.getCurrency().getCurrencyCode());
+    transactionEntity.setAmount(transactionAmount);
 
     try {
       transactionRepository.save(transactionEntity);

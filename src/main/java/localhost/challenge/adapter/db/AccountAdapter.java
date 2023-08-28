@@ -1,6 +1,5 @@
 package localhost.challenge.adapter.db;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import localhost.challenge.adapter.db.entity.AccountEntity;
 import localhost.challenge.adapter.db.entity.AccountRepository;
@@ -30,8 +29,7 @@ public class AccountAdapter implements GetAccount, CreateAccount, IsAccountExist
   @Override
   public Account createAccount(Account account) throws AccountCreationException {
     var newEntity = new AccountEntity();
-    newEntity.setBalance(account.amount().getNumber().numberValue(BigDecimal.class));
-    newEntity.setCurrency(account.amount().getCurrency().getCurrencyCode());
+    newEntity.setAmount(account.amount());
     newEntity.setAccountId(account.accountId());
 
     try {

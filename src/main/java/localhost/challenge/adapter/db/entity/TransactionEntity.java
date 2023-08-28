@@ -1,12 +1,16 @@
 package localhost.challenge.adapter.db.entity;
 
+import io.hypersistence.utils.hibernate.type.money.MonetaryAmountType;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
-import java.math.BigDecimal;
+import javax.money.MonetaryAmount;
 import lombok.Data;
+import org.hibernate.annotations.CompositeType;
 
 @Entity(name = "transaction")
 @Data
@@ -20,9 +24,10 @@ public class TransactionEntity {
 
   @OneToOne AccountEntity to;
 
-  private BigDecimal amount;
-
-  private String currency;
+  @AttributeOverride(name = "amount", column = @Column(name = "amount"))
+  @AttributeOverride(name = "currency", column = @Column(name = "currency"))
+  @CompositeType(MonetaryAmountType.class)
+  private MonetaryAmount amount;
 
   private String transactionId;
 }

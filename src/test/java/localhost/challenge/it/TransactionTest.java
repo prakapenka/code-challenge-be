@@ -109,7 +109,8 @@ class TransactionTest extends TestContainers {
   private BigDecimal getBalanceForAccount(String accountId) {
     return accountRepository
         .findByAccountId(accountId)
-        .map(AccountEntity::getBalance)
+        .map(AccountEntity::getAmount)
+        .map(ma -> ma.getNumber().numberValue(BigDecimal.class))
         .orElseThrow();
   }
 }
