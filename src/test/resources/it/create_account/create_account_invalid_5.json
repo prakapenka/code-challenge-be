@@ -1,0 +1,7 @@
+{
+  "accountId" : "unknown_currency",
+  "balance" : {
+    "amount" : 0.101,
+    "currencyUnit" : "AAA"
+  }
+}

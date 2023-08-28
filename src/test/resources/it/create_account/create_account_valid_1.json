@@ -1,0 +1,7 @@
+{
+  "accountId" : "test_id_1.com",
+  "balance" : {
+    "amount" : 0.00,
+    "currencyUnit" : "EUR"
+  }
+}

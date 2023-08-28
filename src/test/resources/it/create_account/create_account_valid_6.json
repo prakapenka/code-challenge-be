@@ -1,0 +1,7 @@
+{
+  "accountId" : "fraction_10",
+  "balance" : {
+    "amount" : 0.10,
+    "currencyUnit" : "EUR"
+  }
+}

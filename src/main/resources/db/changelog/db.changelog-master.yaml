@@ -1,0 +1,13 @@
+databaseChangeLog:
+  -  changeSet:
+       id:  1
+       author:  prakapenka
+       changes:
+         - sqlFile:
+            path: /db/changelog/changes-0.sql
+  - changeSet:
+      id: 2
+      author: prakapenka
+      changes:
+        - sqlFile:
+            path: /db/changelog/changes-1.sql

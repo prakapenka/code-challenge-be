@@ -1,0 +1,7 @@
+{
+  "accountId" : "ab",
+  "balance" : {
+    "amount" : 1.00,
+    "currencyUnit" : "EUR"
+  }
+}
