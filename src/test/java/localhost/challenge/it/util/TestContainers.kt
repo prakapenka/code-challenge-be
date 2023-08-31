@@ -1,21 +1,22 @@
-package localhost.challenge.it.util;
+package localhost.challenge.it.util
 
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 
 @Testcontainers
-public class TestContainers {
-
-  @Container
-  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:bullseye");
-
-  @DynamicPropertySource
-  static void configureProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.datasource.url", postgres::getJdbcUrl);
-    registry.add("spring.datasource.username", postgres::getUsername);
-    registry.add("spring.datasource.password", postgres::getPassword);
-  }
+open class TestContainers {
+    companion object {
+        @Container
+        var postgres: PostgreSQLContainer<*> = PostgreSQLContainer("postgres:bullseye")
+        @DynamicPropertySource
+        @JvmStatic
+        fun configureProperties(registry: DynamicPropertyRegistry) {
+            registry.add("spring.datasource.url") { postgres.getJdbcUrl() }
+            registry.add("spring.datasource.username") { postgres.username }
+            registry.add("spring.datasource.password") { postgres.password }
+        }
+    }
 }

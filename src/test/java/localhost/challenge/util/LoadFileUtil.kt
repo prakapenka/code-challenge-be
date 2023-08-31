@@ -1,16 +1,18 @@
-package localhost.challenge.util;
+package localhost.challenge.util
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import org.springframework.util.ResourceUtils;
-import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
+import org.springframework.util.ResourceUtils
+import org.testcontainers.shaded.org.apache.commons.io.FileUtils
+import java.io.IOException
+import java.nio.charset.StandardCharsets
 
-public final class LoadFileUtil {
-
-  private LoadFileUtil() {}
-
-  public static String loadJsonFileAsString(String path) throws IOException {
-    final var file = ResourceUtils.getFile(path);
-    return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-  }
+object LoadFileUtil {
+    @JvmStatic
+    fun loadJsonFileAsString(path: String): String {
+        return try {
+            val file = ResourceUtils.getFile(path)
+            FileUtils.readFileToString(file, StandardCharsets.UTF_8)
+        } catch (e: IOException) {
+            throw RuntimeException("Unable to load resource $path", e)
+        }
+    }
 }
